@@ -12,7 +12,7 @@ from jupyter_server.base.handlers import APIHandler as BaseAPIHandler, JupyterHa
 from jupyter_server.utils import ensure_async
 
 from .task_manager import TaskManager
-from .models import ChatHistory, PromptRequest, ChatRequest
+from .models import ChatHistory, IndexRequest, PromptRequest, ChatRequest
 from langchain.schema import _message_to_dict, HumanMessage, AIMessage
 
 class APIHandler(BaseAPIHandler):
@@ -238,3 +238,28 @@ class ChatHandler(
     def on_close(self):
         self.log.debug("Disconnecting client with user %s", self.current_user.username)
         self.remove_chat_client(self.current_user.username)
+
+
+class DocumentIndexHandler(BaseAPIHandler):
+
+    _document_index_manager = None
+
+    @property
+    def document_index_manager(self):
+        if self._document_index_manager is None:
+            self._document_index_manager = self.settings["document_index_manager"]
+
+        return self._document_index_manager
+
+    @tornado.web.authenticated
+    def post(self):
+        request = IndexRequest(**self.get_json_body())
+        self.document_index_manager.add_to_index(request.dir_path)
+        self.set_status(204)
+        self.finish()
+
+    @tornado.web.authenticated
+    def get(self):
+        """Get list of indexed dirs"""
+        response = json.dumps(self.document_index_manager.indexed_dirs)
+        self.finish(response)

@@ -1,7 +1,8 @@
 import queue
+from jupyter_ai.document_index_manager import DocumentIndexManager
 from jupyter_server.extension.application import ExtensionApp
 from langchain import ConversationChain
-from .handlers import ChatHandler, ChatHistoryHandler, PromptAPIHandler, TaskAPIHandler, ChatAPIHandler
+from .handlers import ChatHandler, ChatHistoryHandler, DocumentIndexHandler, PromptAPIHandler, TaskAPIHandler, ChatAPIHandler
 from importlib_metadata import entry_points
 import inspect
 from .engine import BaseModelEngine
@@ -25,6 +26,7 @@ class AiExtension(ExtensionApp):
         (r"api/ai/tasks/([\w\-:]*)", TaskAPIHandler),
         (r"api/ai/chats/?", ChatHandler),
         (r"api/ai/chats/history?", ChatHistoryHandler),
+        (r"api/ai/index?", DocumentIndexHandler),
     ]
 
     @property
@@ -113,5 +115,11 @@ class AiExtension(ExtensionApp):
 
         # Store chat clients in a dictionary
         self.settings["chat_clients"] = {}
+
+        # Create document index manager and save to settings
+        self.settings["document_index_manager"] = DocumentIndexManager(root=self.serverapp.root_dir)
         
-    
+
+    async def stop_extension(self):
+        doc_index_manager = self.settings["document_index_manager"]
+        doc_index_manager.save_to_disk()

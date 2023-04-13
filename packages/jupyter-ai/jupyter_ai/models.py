@@ -36,3 +36,6 @@ class ChatHistory(BaseModel):
         json_encoders = {
             BaseMessage: lambda v: _message_to_dict(v)
         }
+
+class IndexRequest(BaseModel):
+    dir_path: str

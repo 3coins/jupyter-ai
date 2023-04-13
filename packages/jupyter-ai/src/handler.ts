@@ -87,6 +87,10 @@ export namespace AiService {
     insertion_mode: 'above' | 'below' | 'replace';
   }
 
+  export type IndexRequest = {
+    dir_path: string
+  }
+
   export async function sendPrompt(
     request: IPromptRequest
   ): Promise<IPromptResponse> {
@@ -115,6 +119,17 @@ export namespace AiService {
       return Promise.reject(e);
     }
     return data as IPromptResponse;
+  }
+
+  export async function indexDirectory(request: IndexRequest): Promise<void> {
+    try {
+      await requestAPI(`index`, {
+        method: 'POST',
+        body: JSON.stringify(request)
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
 
   export type ListTasksEntry = {

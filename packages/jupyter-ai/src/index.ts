@@ -17,6 +17,8 @@ import { psychologyIcon } from './icons';
 import { getTextSelection } from './utils';
 import { buildChatSidebar } from './widgets/chat-sidebar';
 import { SelectionWatcher } from './selection-watcher';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { AiService } from './handler';
 
 export enum NotebookTasks {
   GenerateCode = 'generate-code-in-cells-below',
@@ -36,6 +38,7 @@ export namespace CommandIDs {
   export const insertReplace = 'ai:insert-replace';
   export const insertAboveInCells = 'ai:insert-above-in-cells';
   export const insertBelowInCells = 'ai:insert-below-in-cells';
+  export const indexDirectory = 'ai:index-directory'
 }
 
 export type DocumentTracker = IWidgetTracker<IDocumentWidget>;
@@ -46,13 +49,15 @@ export type DocumentTracker = IWidgetTracker<IDocumentWidget>;
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyter_ai:plugin',
   autoStart: true,
-  requires: [INotebookTracker, IEditorTracker],
+  requires: [INotebookTracker, IEditorTracker, IFileBrowserFactory],
   activate: (
     app: JupyterFrontEnd,
     notebookTracker: INotebookTracker,
-    editorTracker: IEditorTracker
+    editorTracker: IEditorTracker,
+    fileBrowserFactory: IFileBrowserFactory
   ) => {
     const { commands, shell } = app;
+    const fileBrowserTracker = fileBrowserFactory.tracker;
 
     /**
      * Register core commands
@@ -123,6 +128,25 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.explainOrCodifyCell, {
       execute: buildNotebookShortcutCommand(notebookTracker, app),
       label: 'Explain or codify cell with AI',
+      icon: psychologyIcon
+    });
+
+    commands.addCommand(CommandIDs.indexDirectory, {
+      execute: async () => {
+        const widget = fileBrowserTracker.currentWidget;
+        let dirPath = "";
+        if(widget == null) {
+          return;
+        }
+        const firstItem = widget.selectedItems().next()
+        if(firstItem == null || firstItem == undefined){
+          return;
+        }
+        dirPath = firstItem.path;
+        await AiService.indexDirectory({ dir_path: dirPath });
+        alert(`Dir ${dirPath} indexed successfully.`);
+      },
+      label: 'Index directory for chat',
       icon: psychologyIcon
     });
   }

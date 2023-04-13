@@ -38,6 +38,12 @@
         "command": "ai:generate-from-editor-selection",
         "selector": ".jp-FileEditor",
         "rank": 520
+      },
+      {
+        "name": "ai:index-directory",
+        "command": "ai:index-directory",
+        "selector": ".jp-DirListing-item[data-file-type=\"directory\"]",
+        "rank": 100
       }
     ]
   },

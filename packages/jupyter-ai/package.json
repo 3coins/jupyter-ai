@@ -64,6 +64,7 @@
     "@jupyterlab/cells": "^3.4.2",
     "@jupyterlab/coreutils": "^5.1.0",
     "@jupyterlab/fileeditor": "^3.5.1",
+    "@jupyterlab/filebrowser": "^3.6.3",
     "@jupyterlab/notebook": "^3.4.2",
     "@jupyterlab/services": "^6.1.0",
     "@jupyterlab/ui-components": "^3.4.2",
