@@ -36,10 +36,11 @@ class DocumentIndexManager:
             self._doc_index = GPTSimpleVectorIndex.load_from_disk(self.index_save_path)
             with open(self.indexed_dirs_save_path, 'r:utf-8') as fp:
                 self.indexed_dirs = json.load(fp)
+            print(f"Loaded index for dirs: {self.indexed_dirs}")
         else:
             self._doc_index = GPTEmptyIndex()
         
-    def add_to_index(self, path: str, recreate: False):
+    def add_to_index(self, path: str, recreate: bool = False):
         """Adds text documents at a path to the index,
         path is relative to the jupyter server root dir.
         """

@@ -9,6 +9,7 @@ from .engine import BaseModelEngine
 from jupyter_ai_magics.providers import ChatOpenAIProvider, ChatOpenAINewProvider
 import os
 
+from langchain.agents import AgentType, Tool, initialize_agent
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import (
     ChatPromptTemplate, 
@@ -16,6 +17,7 @@ from langchain.prompts import (
     SystemMessagePromptTemplate, 
     HumanMessagePromptTemplate
 )
+
 
 class AiExtension(ExtensionApp):
     name = "jupyter_ai"
@@ -92,6 +94,16 @@ class AiExtension(ExtensionApp):
 
         ## load OpenAI new provider
         if ChatOpenAINewProvider.auth_strategy.name in os.environ:
+            index = DocumentIndexManager(root_dir=self.serverapp.root_dir)
+            tools = [
+                Tool(
+                    name = "Jupyter AI Doc Index",
+                    func=index.doc_index.query,
+                    description="Useful when the input to this tool starts with the string '/fs'.",
+                    return_direct=True
+                ),
+            ]
+
             provider = ChatOpenAINewProvider(model_id="gpt-3.5-turbo")
             # Create a conversation memory
             memory = ConversationBufferMemory(return_messages=True)
@@ -100,12 +112,15 @@ class AiExtension(ExtensionApp):
                 MessagesPlaceholder(variable_name="history"),
                 HumanMessagePromptTemplate.from_template("{input}")
             ])
+            chain = initialize_agent(tools, provider, agent=AgentType.SELF_ASK_WITH_SEARCH, memory=memory, verbose=True)
+            """
             chain = ConversationChain(
                 llm=provider, 
                 prompt=prompt_template,
                 verbose=True, 
                 memory=memory
             )
+            """
             self.settings["chat_provider"] = chain
 
         self.log.info(f"Registered {self.name} server extension")
@@ -117,7 +132,7 @@ class AiExtension(ExtensionApp):
         self.settings["chat_clients"] = {}
 
         # Create document index manager and save to settings
-        self.settings["document_index_manager"] = DocumentIndexManager(root=self.serverapp.root_dir)
+        self.settings["document_index_manager"] = index
         
 
     async def stop_extension(self):

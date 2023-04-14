@@ -36,6 +36,10 @@ class APIHandler(BaseAPIHandler):
     def openai_chat(self):
         return self.settings["openai_chat"]
     
+    @property
+    def chat_provider(self):
+        return self.settings["chat_provider"]
+    
 class PromptAPIHandler(APIHandler):
     @tornado.web.authenticated
     async def post(self):
@@ -72,12 +76,13 @@ class ChatAPIHandler(APIHandler):
         if not self.openai_chat:
             raise HTTPError(500, "No chat models available.")
         
-        result = await ensure_async(self.openai_chat.agenerate([request.prompt]))
-        output = result.generations[0][0].text
-        self.openai_chat.append_exchange(request.prompt, output)
+        result = self.chat_provider.run(input=request.prompt)
+        #result = await ensure_async(self.openai_chat.agenerate([request.prompt]))
+        #output = result.generations[0][0].text
+        #self.openai_chat.append_exchange(request.prompt, output)
 
         self.finish(json.dumps({
-            "output": output,
+            "output": result,
         }))
 
 class TaskAPIHandler(APIHandler):
