@@ -908,10 +908,12 @@ In this sample, the `bedrock` provider will be created with the value for
 `model_kwargs` when `ai21.j2-mid-v1` model is selected.
 
 ```bash
-jupyter lab --AiExtension.model_parameters {"bedrock:ai21.j2-mid-v1":{"model_kwargs":{"maxTokens":200}}}
+jupyter lab --AiExtension.model_parameters bedrock:ai21.j2-mid-v1='{"model_kwargs":{"maxTokens":200}}'
 ```
 
-The above will result in the following LLM class to be generated.
+Note the usage of single quotes surrounding the dictionary to escape the double
+quotes. This is required in some shells. The above will result in the following
+LLM class to be generated.
 
 ```python
 BedrockProvider(model_kwargs={"maxTokens":200}, ...)
@@ -922,7 +924,7 @@ values for `max_tokens` and `temperature`, when `claude-2` model is selected.
 
 
 ```bash
-jupyter lab --AiExtension.model_parameters {"anthropic:claude-2":{"max_tokens":1024,"temperature":0.9}}
+jupyter lab --AiExtension.model_parameters anthropic:claude-2='{"max_tokens":1024,"temperature":0.9}'
 ```
 
 The above will result in the following LLM class to be generated.
@@ -930,6 +932,20 @@ The above will result in the following LLM class to be generated.
 ```python
 AnthropicProvider(max_tokens=1024, temperature=0.9, ...)
 ```
+
+To pass multiple sets of model parameters for multiple models in the
+command-line, you can append them as additional arguments to
+`--AiExtension.model_parameters`, as shown below.
+
+```bash
+jupyter lab \
+--AiExtension.model_parameters bedrock:ai21.j2-mid-v1='{"model_kwargs":{"maxTokens":200}}' \
+--AiExtension.model_parameters anthropic:claude-2='{"max_tokens":1024,"temperature":0.9}'
+```
+
+However, for more complex configuration, we highly recommend that you specify
+this in a dedicated configuration file. We will describe how to do so in the
+following section.
 
 #### Configuring as a config file
 
