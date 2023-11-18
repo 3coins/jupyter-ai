@@ -9,6 +9,7 @@ in JupyterLab and the Jupyter Notebook. More specifically, Jupyter AI offers:
 * A native chat UI in JupyterLab that enables you to work with generative AI as a conversational assistant.
 * Support for a wide range of generative model providers and models
   (AI21, Anthropic, Cohere, Hugging Face, OpenAI, SageMaker, etc.).
+* Local model support through GPT4All, enabling use of generative AI models on consumer grade machines with ease and privacy.  
 
 <img src="_static/jupyter-ai-screenshot.png"
     alt='A screenshot of Jupyter AI showing the chat interface and the magic commands'
